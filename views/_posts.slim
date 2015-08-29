@@ -1,0 +1,14 @@
+div id='posts' class='span-15'
+  - @posts.each do |post|
+    div classs='post'
+      - unless post.content.nil? 
+        - username = link_to_post_user(post)
+        strong
+          == link_to_user(username)
+        = display_post(post)
+        div class='date'
+          = time_ago_in_words(post.created_at)
+        end
+  - if @posts.empty?
+    No posts.
+

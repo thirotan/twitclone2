@@ -1,0 +1,9 @@
+div class='spna-16' id='maincol'
+  h3 Timeline
+  Posts from all users.
+  br
+  == slim :_posts
+div class='span-7 last' id='rightcol'
+  div class='span-7 box'
+    h4 New Users
+    == slim :_user_list, locals: {:users => User.new_users}

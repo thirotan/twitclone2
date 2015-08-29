@@ -1,0 +1,30 @@
+DOCTYPE
+html
+  head
+    title Test
+    link rel="stylesheet" href="/css/screen.css" type="text/css" media="screen, projection"
+    link rel="stylesheet" href="/css/print.css" type="text/css" media="print"
+    link rel="stylesheet" href="/css/custom.css" type="text/css" media="screen, projection"
+  body
+    br
+    div class="container"
+      div id="neader" class="span-24"
+        div class="span-12"
+          h1 TEST
+          div class="span-12 last right-align"
+            - if @logged_in_user.username
+              br
+              a href="/" home
+              '| 
+              a href="/#{@logged_in_user.username}/mentions" mentions
+              '| 
+              == link_to_user(@logged_in_user.username)
+              '| 
+              a href="timeline" timeline
+              '| 
+              a href="logout" logout
+        hr
+      div class="span-24"
+        == yield
+      div class="span-24 last"
+        hr

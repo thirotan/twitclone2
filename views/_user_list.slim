@@ -1,0 +1,8 @@
+ul class='user-list'
+  - users[0..99].each do |user|
+    - username = link_to_post_user(user)
+    a href="#{link_to_user(username)}"
+      == link_to_user(username)
+
+- if users.length > 100
+  '... and more!'

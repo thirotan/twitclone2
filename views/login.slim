@@ -1,0 +1,36 @@
+div class='span-11 box'
+  h2 Login
+  - if @login_error
+    div class='error'
+      = @login_error
+  form action='login' method='post'
+    table
+      tr
+        td username
+        td
+          input name='username'
+      tr
+        td password
+        td 
+          input type='password' name='password'
+    input type='submit' value='Log in'
+div class='span-li lost box'
+  h2 Sign up
+  - if @signup_error
+    div class='error'
+      = @signup_error
+  form action='signup' method='post'
+    table
+      tr
+        td username
+        td
+          input name='username' value="#{params[:username]}"
+      tr
+        td password
+        td
+          input type='password' name='password'
+      tr
+        td password again
+        td
+          input type='password' name='password_confirmation'
+    input type='submit' value='Create an account'
