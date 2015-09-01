@@ -3,10 +3,14 @@ source 'https://rubygems.org/'
 gem 'sinatra'
 gem 'sinatra-contrib'
 
-gem 'sequel'
-gem 'mysql2'
 
-gem 'haml'
+gem 'mysql2-cs-bind'
+
+gem 'rack-flash3'
+
+gem 'unicorn'
+gem 'foreman'
+
 gem 'slim'
 
 

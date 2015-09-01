@@ -2,7 +2,6 @@ require 'sinatra/base'
 require 'sinatra/contrib'
 require 'slim'
 
-require 'twitterclone/model'
 require 'twitterclone/timeline'
 
 
@@ -12,6 +11,21 @@ module TwitterClone
     configure  do
       enable :sessions
       set :root, File.dirname(__FILE__) + '/../../'
+    end
+
+    def db
+      Thread.current[:twit_db] ||= Mysql2::Client.new(
+        host: ENV['twit_db_host'] || 'localhost',
+        port: ENV['twit_db_port'] ? ENV['twit_db_port'].to_i : nil,
+        username: ENV['twit_db_user'] || 'root',
+        password: ENV['twit_db_password'],
+        database: ENV['twit_db_name'] || 'twit_db',
+        reconnect: true,
+      )
+    end
+    
+    def calculate_password_hash(password, salt)
+      Digest::SHA256.hexdigest "#{password}:#{salt}"
     end
  
     def Timeline
