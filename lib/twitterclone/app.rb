@@ -1,6 +1,9 @@
 require 'sinatra/base'
 require 'sinatra/contrib'
 require 'slim'
+require 'mysql2-cs-bind'
+require 'rack-flash'
+require 'json'
 
 require 'twitterclone/timeline'
 
@@ -10,6 +13,8 @@ module TwitterClone
 
     configure  do
       enable :sessions
+      use Rack::Session::Cookie, secret: ENV['twit_session_secret'] || 'teitsql'
+      use Rack::flash
       set :root, File.dirname(__FILE__) + '/../../'
     end
 
