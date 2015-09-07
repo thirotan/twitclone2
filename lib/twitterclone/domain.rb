@@ -34,6 +34,7 @@ class User < Model
     REDIS.keys(key)
   end
 
+  # user table の user_id を getしてる
   def self.find_by_username(username)
     if id = REDIS.get("user:username:#{username}")
       User.new(id)
@@ -177,11 +178,10 @@ class Post < Model
   end
   
   def user
-    puts "User: debug"
-    puts User.new(user_id)
     User.new(user_id)
   end
 
+  #post dbから user_idを検索して、 user nameを getしてる
   def self.username(id)
     user_id = REDIS.get("post:id:#{id}:user_id")
     REDIS.get("user:id:#{user_id}:username")

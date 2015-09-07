@@ -49,13 +49,13 @@ module TwitterClone
     helpers do
       def link_to_user(user)
         f = <<-HTML
-<a href="/user/#{user}">#{user}</a>
+<a href="/user/#{user.username}">#{user.username}</a>
         HTML
       end
 
       def link_to_post_user(user)
-        # change to mysql query
-        Post.username(user.id)
+        db.xquery("SELECT username FROM users WHERE id = (select user_id from posts where id = ?);", user)
+        #Post.username(user.id)
       end
 
       def pluralize(singular, plural, count)
@@ -72,6 +72,7 @@ module TwitterClone
       if post.content
         post.content.to_s.gsub(/@\w+/) do |mention|
           # change to mysql query
+          db.xquery("SELECT username FROM users WHERE ")
           if user = User.find_by_username(mention[1..-1])
             "@" + link_to_user(user)
           else
