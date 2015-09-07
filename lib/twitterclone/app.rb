@@ -54,6 +54,7 @@ module TwitterClone
       end
 
       def link_to_post_user(user)
+        # change to mysql query
         Post.username(user.id)
       end
 
@@ -70,6 +71,7 @@ module TwitterClone
     def display_post(post)
       if post.content
         post.content.to_s.gsub(/@\w+/) do |mention|
+          # change to mysql query
           if user = User.find_by_username(mention[1..-1])
             "@" + link_to_user(user)
           else
@@ -113,11 +115,13 @@ module TwitterClone
     end
  
     before do
+      # change to mysql query
       keys = User.get_keys("*")
       unless %w(/login /signup).include?(request.path_info) or 
           request.path_info =~ /\.css$/ or session["user_id"]
         redirect '/login', 303
       end
+      # change to mysql query
       @logged_in_user = User.find_by_id(session["user_id"])
     end
 
@@ -128,6 +132,7 @@ module TwitterClone
     end
 
     get '/timeline' do
+      # change to mysql query
       @posts = Timeline.page(1)
       slim :timeline
     end
@@ -142,12 +147,14 @@ module TwitterClone
         @posts = @logged_in_user.timeline
         slim :index
       else
+        # change to mysql query
         Post.create(@logged_in_user, params[:content])
         redirect '/'
       end
     end
 
     get '/:follower/follow/:followee' do |follower_username, followee_username|
+      # change to mysql query
       follower = User.find_by_username(follower_username)
       followee = User.find_by_username(followee_username)
       redirect '/' unless @logged_in_user == follower
@@ -156,6 +163,7 @@ module TwitterClone
     end
 
     get '/:follower/stopfollow/:followee' do |follower_username, followee_username|
+      # change to mysql query
       follower = User.find_by_username(follower_username)
       followee = User.find_by_username(followee_username)
       redirect '/' unless @logged_in_user == follower
@@ -164,6 +172,7 @@ module TwitterClone
     end
 
     get '/user/:username' do |username|
+      # change to mysql query
       @user = User.find_by_username(username)
       @posts = @user.posts
       @followers = @user.followers
@@ -172,6 +181,7 @@ module TwitterClone
     end
 
     get '/:username/mentions' do |username|
+      # change to mysql query
       @user = User.find_by_username(username)
       @posts = @user.mentions
       slim :mentions
@@ -182,6 +192,7 @@ module TwitterClone
     end
 
     post '/login' do 
+      # change to mysql query
       if user = User.find_by_username(params[:username]) and
            User.hash_pw(user.salt, params[:password]) == user.hashed_password
         session['user_id'] = user.id
@@ -196,6 +207,7 @@ module TwitterClone
     post '/signup' do
       if params[:username] !~ /^\w+$/
         @signup_error = "Username must only contain letters, number and underscores"
+      # change to mysql query
       eleif !User.keys("user:username:#{params[:username]}")
         @signup_error = "That username is taken"
       elsif params[:username].length < 4
@@ -208,6 +220,7 @@ module TwitterClone
       if @signup_error
         slim :login
       else
+        # change to mysql query
         user = User.create(params[:username], params[:password])
         session['user_id'] = user.id
         redirect '/'
