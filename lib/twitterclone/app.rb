@@ -72,8 +72,8 @@ module TwitterClone
       if post.content
         post.content.to_s.gsub(/@\w+/) do |mention|
           # change to mysql query
-          db.xquery("SELECT username FROM users WHERE ")
-          if user = User.find_by_username(mention[1..-1])
+          if user = db.xquery("SELECT * FROM users WHERE username = ?;", mention[1..-1])
+          # if user = User.find_by_username(mention[1..-1])
             "@" + link_to_user(user)
           else
             mention
