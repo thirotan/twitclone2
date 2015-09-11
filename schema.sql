@@ -22,3 +22,4 @@ CREATE TABLE IF NOT EXISTS `posts` (
   `message` varchar(255) NOT NULL UNIQUE,
   `created_at`  DATETIME NOT NULL
 ) DEFAULT CHARSET=utf8;
+

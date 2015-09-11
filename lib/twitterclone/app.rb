@@ -54,7 +54,7 @@ module TwitterClone
       end
 
       def link_to_post_user(user)
-        db.xquery("SELECT username FROM users WHERE id = (select user_id from posts where id = ?);", user)
+        db.xquery("SELECT * FROM users WHERE id = (select user_id from posts where id = ?);", user)
         #Post.username(user.id)
       end
 
@@ -117,13 +117,14 @@ module TwitterClone
  
     before do
       # change to mysql query
-      keys = User.get_keys("*")
+      #keys = User.get_keys("*")
       unless %w(/login /signup).include?(request.path_info) or 
           request.path_info =~ /\.css$/ or session["user_id"]
         redirect '/login', 303
       end
       # change to mysql query
-      @logged_in_user = User.find_by_id(session["user_id"])
+      @logged_in_user = db.xquery("SELECT username FROM users WHERE id = ?;", session["user_id"])
+      #@logged_in_user = User.find_by_id(session["user_id"])
     end
 
 
@@ -133,7 +134,9 @@ module TwitterClone
     end
 
     get '/timeline' do
-      # change to mysql query
+      # change to mysql query 
+      # pending...
+      @posts = db.xquery("SELECT message FROM posts where posts BETWEEN last_post_id TO last_opst_id-10 ")
       @posts = Timeline.page(1)
       slim :timeline
     end

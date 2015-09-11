@@ -5,7 +5,7 @@ div id='posts' class='span-15'
         - username = link_to_post_user(post)
         strong
           == link_to_user(username)
-        = display_post(post)
+        = display_popost
         div class='date'
           = time_ago_in_words(post.created_at)
         end
