@@ -5,8 +5,6 @@ require 'mysql2-cs-bind'
 require 'rack-flash'
 require 'json'
 
-require 'twitterclone/timeline'
-
 
 module TwitterClone
   class Application < Sinatra::Base
@@ -22,8 +20,8 @@ module TwitterClone
       Thread.current[:twit_db] ||= Mysql2::Client.new(
         host: ENV['twit_db_host'] || 'localhost',
         port: ENV['twit_db_port'] ? ENV['twit_db_port'].to_i : nil,
-        username: ENV['twit_db_user'] || 'root',
-        password: ENV['twit_db_password'],
+        username: ENV['twit_db_user'] || 'mysql_user',
+        password: ENV['twit_db_password'] || 'mysql_user_password',
         database: ENV['twit_db_name'] || 'twit_db',
         reconnect: true,
       )
@@ -37,18 +35,6 @@ module TwitterClone
       Digest::MD5.hexdigest(salt + password)
     end
  
-    def Timeline
-      $timeline ||= Timeline.new
-    end
-
-    def User
-      $user ||= User.new
-    end
-
-    def Post
-      $post ||= Post.new
-    end
-
 
     helpers do
       def link_to_user(user)
