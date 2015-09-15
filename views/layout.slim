@@ -12,13 +12,13 @@ html
         div class="span-12"
           h1 TEST
           div class="span-12 last right-align"
-            - if @logged_in_user.username
+            - if @logged_in_user
               br
               a href="/" home
               '| 
-              a href="/#{@logged_in_user.username}/mentions" mentions
+              a href="/#{@logged_in_user}/mentions" mentions
               '| 
-              == link_to_user(@logged_in_user.username)
+              == link_to_user(@logged_in_user)
               '| 
               a href="timeline" timeline
               '| 

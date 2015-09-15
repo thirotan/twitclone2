@@ -12,7 +12,7 @@ module TwitterClone
     configure  do
       enable :sessions
       use Rack::Session::Cookie, secret: ENV['twit_session_secret'] || 'teitsql'
-      use Rack::flash
+      use Rack::Flash
       set :root, File.dirname(__FILE__) + '/../../'
     end
 
@@ -20,8 +20,8 @@ module TwitterClone
       Thread.current[:twit_db] ||= Mysql2::Client.new(
         host: ENV['twit_db_host'] || 'localhost',
         port: ENV['twit_db_port'] ? ENV['twit_db_port'].to_i : nil,
-        username: ENV['twit_db_user'] || 'mysql_user',
-        password: ENV['twit_db_password'] || 'mysql_user_password',
+        username: ENV['twit_db_user'] || 'dev',
+        password: ENV['twit_db_password'] || 'abcdefg',
         database: ENV['twit_db_name'] || 'twit_db',
         reconnect: true,
       )
@@ -39,7 +39,7 @@ module TwitterClone
     helpers do
       def link_to_user(user)
         f = <<-HTML
-<a href="/user/#{user.username}">#{user.username}</a>
+<a href="/user/#{user}">#{user}</a>
         HTML
       end
 
@@ -112,9 +112,7 @@ module TwitterClone
           request.path_info =~ /\.css$/ or session["user_id"]
         redirect '/login', 303
       end
-      # change to mysql query
       @logged_in_user = db.xquery("SELECT username FROM users WHERE id = ?;", session["user_id"])
-      #@logged_in_user = User.find_by_id(session["user_id"])
     end
 
 
@@ -124,10 +122,7 @@ module TwitterClone
     end
 
     get '/timeline' do
-      # change to mysql query 
-      # pending...
       @posts = db.xquery("SELECT message FROM posts where posts BETWEEN last_post_id TO last_opst_id-10 ")
-      #@posts = Timeline.page(1)
       slim :timeline
     end
 
@@ -141,40 +136,30 @@ module TwitterClone
         @posts = @logged_in_user.timeline
         slim :index
       else
-        # change to mysql query
         posted_time = Time.now
         db.xquery("INSERT into posts (user_id, message, created_at), values(?, ?, ?)", session["user_id"]. params[:content], posted_time)
-        #Post.create(@logged_in_user, params[:content])
         redirect '/'
       end
     end
 
     get '/:follower/follow/:followee' do |follower_username, followee_username|
-      # change to mysql query
       follower = db.xquery("SELECT * FROM users WHERE username = ?;", follower_username)
-      #follower = User.find_by_username(follower_username)
       follwoees = db.xquery("SELECT * FROM users WHERE username = ?;", followee_username)
-      #followee = User.find_by_username(followee_username)
       redirect '/' unless @logged_in_user == follower
       follower.follow(followee)
       redirect "/user/" + followee_username
     end
 
     get '/:follower/stopfollow/:followee' do |follower_username, followee_username|
-      # change to mysql query
       follower = db.xquery("SELECT * FROM users WHERE username = ?;", follower_username)
-      #follower = User.find_by_username(follower_username)
       follwoees = db.xquery("SELECT * FROM users WHERE username = ?;", followee_username)
-      #followee = User.find_by_username(followee_username)
       redirect '/' unless @logged_in_user == follower
       follower.stop_following(followee)
       redirect '/' + followee_username
     end
 
     get '/user/:username' do |username|
-      # change to mysql query
       @user = db.xquery("SELECT * FROM users WHERE username = ?;", usernmae)
-      #@user = User.find_by_username(username)
       @posts = @user.posts
       @followers = @user.followers
       @followees = @user.followees
@@ -182,7 +167,6 @@ module TwitterClone
     end
 
     get '/:username/mentions' do |username|
-      # change to mysql query
       @user = db.xquery("SELECT * FROM users WHERE username = ?;", usernmae)
       @user = User.find_by_username(username)
       @posts = @user.mentions
@@ -194,11 +178,8 @@ module TwitterClone
     end
 
     post '/login' do 
-      # change to mysql query
       if user = db.xquery("SELECT * FROM users WHERE username = ?;", usernmae) and
-          hash_pw(user.salt, params[:password]) = user.hashed_password
-#      if user = User.find_by_username(params[:username]) and
-#           User.hash_pw(user.salt, params[:password]) == user.hashed_password
+          hash_pw(user.salt, params[:password]) == user.hashed_password
         session['user_id'] = user.id
         redirect '/'
       else
@@ -210,9 +191,7 @@ module TwitterClone
     post '/signup' do
       if params[:username] !~ /^\w+$/
         @signup_error = "Username must only contain letters, number and underscores"
-      # change to mysql query
       elsif !db.xquery("SELECT id FROM users WHERE username = ?;", params[:usernmae])
-      #elsif !User.keys("user:username:#{params[:username]}")
         @signup_error = "That username is taken"
       elsif params[:username].length < 4
         @signup_error = "Username must be at least 4 characters"
@@ -224,9 +203,7 @@ module TwitterClone
       if @signup_error
         slim :login
       else
-        # change to mysql query
-        user = db.xquery("INSERT INTO user (username, password_hash) values(?, ?);", params[:username], params[:password])
-        #user = User.create(params[:username], params[:password])
+        user = db.xquery("INSERT INTO users (username, password_hash) values(?, ?);", params[:username], params[:password])
         session['user_id'] = user.id
         redirect '/'
       end
