@@ -168,7 +168,6 @@ module TwitterClone
 
     get '/:username/mentions' do |username|
       @user = db.xquery("SELECT * FROM users WHERE username = ?;", usernmae)
-      @user = User.find_by_username(username)
       @posts = @user.mentions
       slim :mentions
     end
@@ -178,8 +177,8 @@ module TwitterClone
     end
 
     post '/login' do 
-      if user = db.xquery("SELECT * FROM users WHERE username = ?;", usernmae) and
-          hash_pw(user.salt, params[:password]) == user.hashed_password
+      if user = db.xquery("SELECT * FROM users WHERE username = ?;", params[:username]) and
+          hash_pw(user.first['password_hash'], params[:password]) == user.first['password_hash']
         session['user_id'] = user.id
         redirect '/'
       else
