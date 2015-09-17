@@ -34,6 +34,11 @@ module TwitterClone
     def hash_pw(salt, password)
       Digest::MD5.hexdigest(salt + password)
     end
+
+    def new_salt
+      arr = %w(a b c d e f)
+      (0..6).to_a.map{ arr[rand(6)] }.join
+    end
  
 
     helpers do
@@ -44,8 +49,7 @@ module TwitterClone
       end
 
       def link_to_post_user(user)
-        db.xquery("SELECT * FROM users WHERE id = (select user_id from posts where id = ?);", user)
-        #Post.username(user.id)
+        db.xquery("SELECT username FROM users WHERE id = (select user_id from posts where id = ?);", user).first
       end
 
       def pluralize(singular, plural, count)
@@ -61,9 +65,7 @@ module TwitterClone
     def display_post(post)
       if post.content
         post.content.to_s.gsub(/@\w+/) do |mention|
-          # change to mysql query
-          if user = db.xquery("SELECT * FROM users WHERE username = ?;", mention[1..-1])
-          # if user = User.find_by_username(mention[1..-1])
+          if user = db.xquery("SELECT * FROM users WHERE username = ?;", mention[1..-1]).first
             "@" + link_to_user(user)
           else
             mention
@@ -108,21 +110,20 @@ module TwitterClone
     before do
       # change to mysql query
       #keys = User.get_keys("*")
-      unless %w(/login /signup).include?(request.path_info) or 
-          request.path_info =~ /\.css$/ or session["user_id"]
+      unless %w(/login /signup).include?(request.path_info) or request.path_info =~ /\.css$/ or session["user_id"]
         redirect '/login', 303
       end
-      @logged_in_user = db.xquery("SELECT username FROM users WHERE id = ?;", session["user_id"])
+      @logged_in_user = db.xquery("SELECT * FROM users WHERE id = ?;", session["user_id"]).first
     end
 
 
     get '/' do
-      @posts = @logged_in_user.timeline
+      @posts = db.xquery("SELECT message FROM posts where user_id = ?;", session['user_id'])
       slim :index
     end
 
     get '/timeline' do
-      @posts = db.xquery("SELECT message FROM posts where posts BETWEEN last_post_id TO last_opst_id-10 ")
+      @posts = db.xquery("SELECT message FROM posts where user_id = ?;", session['user_id'])
       slim :timeline
     end
 
@@ -133,7 +134,8 @@ module TwitterClone
         @posting_error = "Keep it to 140 characters please!"
       end
       if @posting_error
-        @posts = @logged_in_user.timeline
+        @posts = db.xquery("SELECT * FROM users WHERE id = ?;", session["user_id"])
+        puts @posts
         slim :index
       else
         posted_time = Time.now
@@ -177,9 +179,10 @@ module TwitterClone
     end
 
     post '/login' do 
-      if user = db.xquery("SELECT * FROM users WHERE username = ?;", params[:username]) and
-          hash_pw(user.first['password_hash'], params[:password]) == user.first['password_hash']
-        session['user_id'] = user.id
+     
+      if user = db.xquery("SELECT * FROM users WHERE username = ?;", params[:username]).first and
+          hash_pw(user['salt'], params[:password]) == user['password_hash']
+        session['user_id'] = user['id']
         redirect '/'
       else
         @login_error = "Incorrect username or password"
@@ -202,7 +205,9 @@ module TwitterClone
       if @signup_error
         slim :login
       else
-        user = db.xquery("INSERT INTO users (username, password_hash) values(?, ?);", params[:username], params[:password])
+        salt = new_salt  
+        pass = hash_pw(salt, params[:password])
+        user = db.xquery("INSERT INTO users (username, password_hash, salt) values(?, ?, ?);", params[:username], pass, salt)
         session['user_id'] = user.id
         redirect '/'
       end

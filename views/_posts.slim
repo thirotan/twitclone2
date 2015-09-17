@@ -9,6 +9,6 @@ div id='posts' class='span-15'
         div class='date'
           = time_ago_in_words(post.created_at)
         end
-  - if @posts.empty?
+  - if @posts.first.nil?
     No posts.
 

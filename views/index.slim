@@ -4,7 +4,7 @@ div class='span-16' id='maincol'
       div class='error'
         = @posting_error
     form action='/post' method='post'
-      = "#{@logged_in_user.username} what's on your mind?"
+      = "#{@logged_in_user['username']} what's on your mind?"
       br
       textarea name='content' rows='3' columns='70'
       br
@@ -12,10 +12,10 @@ div class='span-16' id='maincol'
   == slim :_posts
 div class='span7 last' id='rightcol'
   div class='span-7 box'
-    - followers = @logged_in_user.followers
+    - followers = @logged_in_user['followers']
     h4 = pluralize('follower', 'followers', followers.length)
     == slim :_user_list, locals: {users: followers}
   div class='span-7 box'
-    - followees = @logged_in_user.followees
+    - followees = @logged_in_user['followees']
     h4 = "Following #{followees.length}"
     == slim :_user_list, locals: {users: followees}
